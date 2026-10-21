@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grammar Circle - Daily Practice & Fun Study</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* 전체 기본 글자 크기 1단계 상향 조정 */
+    body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 1.125rem; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-slate-50/80 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-md shadow-indigo-100">
+          ✨
+        </div>
+        <div>
+          <h1 class="font-black text-xl text-slate-900 tracking-tight">Grammar Circle 🎈</h1>
+          <span class="text-sm text-indigo-600 font-extrabold">English Study Squad</span>
+        </div>
+      </div>
+
+      <!-- Member Profile / Login Button -->
+      <button id="openLoginModalBtn" class="flex items-center space-x-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 px-5 py-2.5 rounded-full text-base font-extrabold transition-all border border-indigo-200/80 shadow-2xs">
+        <span class="text-lg">🐣</span>
+        <span id="currentMemberDisplay">닉네임 등록/입장</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Container -->
+  <div class="max-w-7xl mx-auto px-6 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+
+    <!-- Left Sidebar: Menu Navigation -->
+    <aside class="lg:col-span-4 space-y-4">
+      <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+        
+        <!-- Menu 1: Daily Practice -->
+        <div class="space-y-3">
+          <button id="menuDailyPractice" class="w-full bg-indigo-50 text-indigo-800 font-extrabold p-4 rounded-2xl flex items-center space-x-3 text-lg transition-all border border-indigo-100 shadow-2xs">
+            <span class="text-2xl">✏️</span>
+            <span>Daily Practice</span>
+          </button>
+
+          <!-- Day Selection Dropdown -->
+          <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/60 space-y-2">
+            <label class="block text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+              <span>📅 데일리 학습 선택</span>
+              <span id="dayProgressText" class="text-indigo-600 font-extrabold text-base">Day 1 / 24</span>
+            </label>
+            <select id="dayDropboxSelect" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-base font-bold text-slate-800 bg-white focus:border-indigo-500 outline-none shadow-2xs">
+              <!-- Options Populated Dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Menu 2: Group Feed -->
+        <button id="menuGroupFeed" class="w-full hover:bg-slate-50 text-slate-700 font-bold p-4 rounded-2xl flex items-center space-x-3 text-lg transition-all">
+          <span class="text-2xl">💬</span>
+          <span>Group Feed</span>
+        </button>
+
+        <!-- Menu 3: Unit Roadmap -->
+        <button id="menuUnitRoadmap" class="w-full hover:bg-slate-50 text-slate-700 font-bold p-4 rounded-2xl flex items-center space-x-3 text-lg transition-all">
+          <span class="text-2xl">🗺️</span>
+          <span>Unit Roadmap</span>
+        </button>
+
+        <hr class="border-slate-100 my-3">
+
+        <!-- Study Group Widget Card -->
+        <div class="bg-indigo-50/40 p-5 rounded-2xl border border-indigo-100 space-y-3">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-base font-extrabold text-slate-800">Study Group 🌿</div>
+              <div class="text-sm text-slate-500 mt-1">Today's Submissions: <strong id="submissionRatioText" class="text-indigo-600 font-black">0/0</strong></div>
+            </div>
+            <span class="w-7 h-7 rounded-full bg-emerald-500 text-white text-sm flex items-center justify-center font-bold">
+              ✓
+            </span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+            <div id="groupProgressBar" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Right Main Workspace (8 cols) -->
+    <main class="lg:col-span-8 space-y-7">
+
+      <!-- Active Day Detail Header -->
+      <section class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm relative overflow-hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <span id="activeDayBadge" class="text-base font-black uppercase bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full border border-indigo-100">
+            DAY 1 🌟
+          </span>
+          <span id="activeDayUnits" class="text-base font-bold text-slate-400">Unit 1 - 4</span>
+        </div>
+
+        <div>
+          <h2 id="activeDayTitle" class="text-3xl sm:text-4xl font-black text-slate-900 mb-3">현재시제 & 현재진행형</h2>
+          <p id="activeDayDesc" class="text-base text-slate-600 leading-relaxed font-medium">am/is/are + -ing 와 Simple Present의 구분을 다룹니다.</p>
+        </div>
+
+        <!-- Grammar Formula -->
+        <div class="p-6 rounded-2xl bg-indigo-50/60 border border-indigo-100 space-y-3">
+          <div class="text-base font-extrabold text-indigo-900 flex items-center">
+            <span class="text-xl mr-2">📌</span> 핵심 문법 공식 (Key Structure)
+          </div>
+          <div id="grammarFormulaText" class="text-base text-indigo-950 font-mono bg-white/90 p-4 rounded-xl border border-indigo-100 font-bold leading-relaxed">
+            • Present Continuous: am/is/are + v-ing<br>• Simple Present: I/you/we/they + verb, he/she/it + verb(s)
+          </div>
+        </div>
+
+        <!-- Common Pitfalls -->
+        <div class="space-y-4">
+          <div class="text-base font-extrabold text-slate-800 flex items-center">
+            <span class="text-xl mr-2">🚨</span> 주의해야 할 부분 & 실수하기 쉬운 표현 (Common Pitfalls)
+          </div>
+          <div id="pitfallsContainer" class="space-y-4">
+            <!-- Populated Dynamically -->
+          </div>
+        </div>
+
+        <!-- Pro Grammar Tip -->
+        <div class="p-5 rounded-2xl bg-amber-50/60 border border-amber-200/80 text-base text-slate-700 flex items-start space-x-3">
+          <span class="text-2xl flex-shrink-0">💡</span>
+          <div>
+            <strong class="font-extrabold text-slate-900">리더의 꿀팁:</strong>
+            <span id="proTipText" class="text-slate-700 font-medium ml-1">상태 동사는 진행형으로 쓰지 않도록 주의하세요!</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Writing & Practice Section (작문 & 인증) -->
+      <section id="practiceSection" class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm space-y-6">
+        <div class="border-b border-slate-100 pb-4">
+          <h3 class="text-xl font-black text-slate-900 flex items-center">
+            <span class="text-2xl mr-2">✍️</span>
+            작문 & 인증
+          </h3>
+          <p class="text-base text-slate-500 mt-1 font-medium">오늘 배운 문법을 활용하여 2~3개의 문장을 작성해 보세요.</p>
+        </div>
+
+        <!-- Member Status Bar -->
+        <div class="bg-slate-50/80 p-5 rounded-2xl border border-slate-200/60">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-base font-extrabold text-slate-700 flex items-center">
+              <span class="mr-2">👥</span> 오늘의 멤버 인증 현황
+            </span>
+            <span class="text-sm font-bold text-slate-400" id="submittedCountText">0/0 완료</span>
+          </div>
+          <div class="flex flex-wrap gap-2.5" id="membersStatusContainer">
+            <!-- Member status badges dynamically rendered -->
+          </div>
+        </div>
+
+        <!-- Sentence Inputs -->
+        <div class="space-y-5">
+          <div>
+            <label class="block text-base font-extrabold text-slate-700 mb-1.5">문장 1 <span class="text-indigo-600">*</span></label>
+            <input type="text" id="sentence1" placeholder="여기에 영어 문장을 입력하세요." 
+              class="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-base font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none">
+            <div id="feedback1" class="hidden text-sm p-3.5 rounded-xl bg-slate-50 border border-slate-200 mt-2 font-bold"></div>
+          </div>
+
+          <div>
+            <label class="block text-base font-extrabold text-slate-700 mb-1.5">문장 2 <span class="text-indigo-600">*</span></label>
+            <input type="text" id="sentence2" placeholder="여기에 영어 문장을 입력하세요." 
+              class="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-base font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none">
+            <div id="feedback2" class="hidden text-sm p-3.5 rounded-xl bg-slate-50 border border-slate-200 mt-2 font-bold"></div>
+          </div>
+
+          <div>
+            <label class="block text-base font-extrabold text-slate-700 mb-1.5">문장 3 <span class="text-slate-400 font-normal">(선택)</span></label>
+            <input type="text" id="sentence3" placeholder="추가 문장을 입력하세요 (선택)" 
+              class="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-base font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none">
+            <div id="feedback3" class="hidden text-sm p-3.5 rounded-xl bg-slate-50 border border-slate-200 mt-2 font-bold"></div>
+          </div>
+        </div>
+
+        <!-- Native Patterns Result Box -->
+        <div id="nativePatternsBox" class="hidden p-6 rounded-2xl bg-indigo-50/40 border border-indigo-100 space-y-4">
+          <div class="flex items-center justify-between border-b border-indigo-100 pb-3">
+            <div class="font-extrabold text-base text-indigo-950 flex items-center">
+              <span class="text-xl mr-2">🎧</span>
+              원어민 실생활 단골 빈번 표현 5가지 (Native Patterns)
+            </div>
+            <button onclick="document.getElementById('nativePatternsBox').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-base font-bold">
+              ✕
+            </button>
+          </div>
+          <div id="nativePatternsList" class="space-y-3.5">
+            <!-- Dynamically populated 5 native sentences -->
+          </div>
+        </div>
+
+        <!-- Action Buttons Matching Layout -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-100">
+          
+          <!-- Left Button: Run Grammar Pattern Check -->
+          <button id="runPatternCheckBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold px-5 py-3.5 rounded-full text-sm sm:text-base flex items-center space-x-2.5 transition-all border border-slate-200/80 shadow-2xs">
+            <span>🔤</span>
+            <span>Run Grammar Pattern Check</span>
+          </button>
+
+          <!-- Right Buttons Group -->
+          <div class="flex items-center space-x-3">
+            <!-- Yellow/Cream Button: Copy for Kakao/Chat -->
+            <button id="copyKakaoBtn" class="bg-amber-50 hover:bg-amber-100 text-amber-900 font-extrabold px-5 py-3.5 rounded-full text-sm sm:text-base flex items-center space-x-2 transition-all border border-amber-200/80">
+              <span>📋</span>
+              <span>Copy for Kakao/Chat</span>
+            </button>
+
+            <!-- Blue/Purple Button: Post to Group Feed -->
+            <button id="submitFeedBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-6 py-3.5 rounded-full text-sm sm:text-base flex items-center space-x-2 transition-all shadow-md shadow-indigo-100">
+              <span>🚀</span>
+              <span>Post to Group Feed</span>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Group Feed Section -->
+      <section id="feedSection" class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <h3 class="text-lg font-black text-slate-900 flex items-center">
+            <span class="text-2xl mr-2">📢</span>
+            Group Feed
+          </h3>
+          <span class="text-sm font-semibold text-slate-400">실시간 스터디 인증목록</span>
+        </div>
+
+        <div id="feedContainer" class="space-y-4">
+          <!-- Dynamic Feed Items -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Nickname Entry Modal -->
+  <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-5">
+      <div class="text-center space-y-2">
+        <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">
+          🐣
+        </div>
+        <h3 class="text-xl font-extrabold text-slate-900">스터디 멤버 입장</h3>
+        <p class="text-sm text-slate-500 font-medium">그룹에서 사용할 닉네임을 입력해 주세요.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-extrabold text-slate-700 mb-1.5">닉네임</label>
+        <input type="text" id="nicknameInput" placeholder="예: 민지, 수현, David" 
+          class="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-base font-medium focus:border-indigo-500 outline-none">
+      </div>
+
+      <div class="flex space-x-3">
+        <button id="closeModalBtn" class="flex-1 bg-slate-100 text-slate-600 text-sm font-bold py-3.5 rounded-xl">취소</button>
+        <button id="saveNicknameBtn" class="flex-1 bg-indigo-600 text-white text-sm font-extrabold py-3.5 rounded-xl shadow-md">입장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full text-base font-bold shadow-xl transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center space-x-2.5">
+    <span>✅</span>
+    <span id="toastMsg">처리되었습니다.</span>
+  </div>
+
+  <script>
+    // --- Rich Curriculum Data with Cute Contextual Emojis & Larger Readable Text ---
+    const curriculumData = [
+      {
+        day: 1, units: "Unit 1 - 4", title: "현재시제 & 현재진행형",
+        formula: "• 진행형: am/is/are + v-ing (지금 하는 중 🏃‍♂️)\n• 단순현재: Subject + Verb(s) (평소 습관/사실 ⏰)",
+        rules: ["am", "is", "are", "ing", "do", "does", "don't", "doesn't"],
+        pitfalls: [
+          { title: "agree, know 등 상태동사의 진행형 오류 ❌", bad: "I am agreeing with you (X)", good: "I agree with you (O) 🤝", note: "상태나 의견을 나타내는 동사는 -ing로 쓰지 않고 바로 사용해요!" },
+          { title: "be동사 + 일반동사 원형 중복 오류 ❌", bad: "I am agree (X)", good: "I agree (O) ✨", note: "be동사(am/is/are) 뒤에 일반동사 원형을 붙이지 않아요." }
+        ],
+        tip: "지금 이 순간 일어나는 일에는 -ing를, 늘 하거나 일반적인 사실에는 단순현재형을 쓰세요!",
+        nativeExpressions: [
+          { emoji: "🤝", en: "I agree with you 100%.", ko: "네 말에 100% 동감해.", note: "I am agree (X) 금지! 찬성할 때 제일 많이 쓰는 표현이에요." },
+          { emoji: "📱", en: "What are you up to right now?", ko: "너 지금 뭐 하고 있어?", note: "What are you doing? 보다 한층 친근하고 편한 진행형 질문이에요." },
+          { emoji: "🏋️‍♂️", en: "I usually work out in the evening.", ko: "나 보통 저녁에 운동해.", note: "일상 습관은 -ing가 아니라 Simple Present 시제로!" },
+          { emoji: "🤒", en: "Are you feeling okay today?", ko: "너 오늘 컨디션 괜찮아?", note: "상대방 상태나 기분을 챙길 때 자주 쓰는 현재진행 표현이에요." },
+          { emoji: "⏱️", en: "It takes about 20 minutes to get there.", ko: "거기 가는데 한 20분 걸려.", note: "일반적 사실이나 시간을 계산할 때 쓰는 필수 시제 구문이에요." }
+        ]
+      },
+      {
+        day: 2, units: "Unit 5 - 8", title: "현재진행 vs 현재시제 비교 & Have/Have got",
+        formula: "• 습관: usually/always + Present Simple ☕\n• 소유: I have = I've got 💻",
+        rules: ["usually", "always", "today", "now", "have got", "has got"],
+        pitfalls: [
+          { title: "습관 표현에 진행형 오용 ❌", bad: "I am taking the subway every day (X)", good: "I take the subway every day (O) 🚇", note: "'매일' 하는 습관은 진행형이 아닌 단순현재형을 써요!" }
+        ],
+        tip: "usually, always, every day가 들어가면 단순현재시제가 정답!",
+        nativeExpressions: [
+          { emoji: "🍽️", en: "I've got a lot on my plate today.", ko: "나 오늘 할 일이 너무 쌓여있어.", note: "have got 구문을 활용한 재미있는 필수 관용구예요!" },
+          { emoji: "⏱️", en: "Have you got a minute?", ko: "너 잠시 시간 좀 있어?", note: "Do you have time? 보다 대화에서 훨씬 빈번하게 쓰여요." },
+          { emoji: "🍕", en: "I usually grab a quick bite for lunch.", ko: "나 보통 점심은 간단하게 때워.", note: "식사 습관을 말할 때 grab a bite 구문을 써보세요." },
+          { emoji: "🏠", en: "She is staying with her friend this week.", ko: "그녀는 이번 주에 친구 집에 머물고 있어.", note: "이번 주만 한시적으로 일어나는 임시 상황은 진행형!" },
+          { emoji: "🎉", en: "Do you have any plans for this weekend?", ko: "이번 주말에 무슨 계획 있어?", note: "주말 일정을 물어볼 때 쓰는 표준 표현이에요." }
+        ]
+      },
+      {
+        day: 3, units: "Unit 9 - 12", title: "과거시제 (Past Simple)",
+        formula: "• 과거동사: went 🚶, bought 🛍️, saw 👁️\n• 부정/의문: did / didn't + 동사원형 🔍",
+        rules: ["was", "were", "ed", "did", "didn't", "yesterday", "ago"],
+        pitfalls: [
+          { title: "did / didn't 뒤 과거형 이중 사용 ❌", bad: "I didn't went there (X)", good: "I didn't go there (O) 🎒", note: "did/didn't 뒤에는 반드시 '동사원형'이 와야 해요!" }
+        ],
+        tip: "yesterday, ago, last week 같은 과거 시점 단어가 있으면 Past Simple!",
+        nativeExpressions: [
+          { emoji: "🎯", en: "How did it go?", ko: "그거 어떻게 됐어 / 잘 끝났어?", note: "Did it go well? 보다 결과를 물을 때 가장 빈번하게 써요." },
+          { emoji: "💔", en: "I didn't mean to hurt your feelings.", ko: "너 기분 상하게 하려던 건 아니었어.", note: "didn't + 동사원형 패턴의 진심 어린 사과 표현이에요." },
+          { emoji: "💡", en: "I totally forgot about that!", ko: "나 그거 까맣게 잊고 있었어!", note: "forgot 과거형을 강조하여 일상 대화에서 자주 써요." },
+          { emoji: "🎁", en: "Where did you get this?", ko: "너 이거 어디서 샀어/구했어?", note: "상대방 옷이나 물건을 칭찬하며 출처를 물을 때 필수!" },
+          { emoji: "💎", en: "It was worth every penny.", ko: "돈이 하나도 안 아까웠어 / 돈값 했어.", note: "was 과거형을 이용해 후기나 소감을 말할 때 써요." }
+        ]
+      },
+      { day: 4, units: "Unit 13 - 14", title: "과거진행형 vs 과거시제", formula: "• 과거진행: was/were + v-ing 🌧️\n• 결합: was -ing WHEN past simple ⚡", rules: ["was", "were", "when", "while"], pitfalls: [{ title: "when/while 시제 착오 ❌", bad: "When I was eating, the phone was ringing (X)", good: "While I was eating, the phone rang (O) 📞" }], tip: "긴 행동 중간에 짧은 이벤트가 '콕' 발생할 때 두 시제를 함께 써요!", nativeExpressions: [{ emoji: "📞", en: "I was just about to call you!", ko: "나 막 너한테 전화하려던 참이었어!", note: "was about to -ing 구문은 단골 표현이에요." }, { emoji: "🙈", en: "Sorry, I was paying attention to something else.", ko: "미안, 나 딴 데 신경 쓰느라 못 들었어.", note: "was -ing 형태로 당시 상황을 설명해요." }, { emoji: "🌧️", en: "It was raining cats and dogs when I left.", ko: "나 나올 때 비가 억수같이 내리고 있었어.", note: "was raining + when 절 결합 패턴이에요." }, { emoji: "🤔", en: "What were you thinking?", ko: "너 도대체 무슨 생각이었어?", note: "상대방의 엉뚱한 행동을 물을 때 써요." }, { emoji: "🙋‍♂️", en: "I was wondering if you could help me.", ko: "혹시 나 좀 도와줄 수 있나 해서요.", note: "was wondering을 쓰면 요청이 훨씬 정중해져요." }] },
+      { day: 5, units: "Unit 15 - 18", title: "현재완료 기본 (Present Perfect 1)", formula: "• have/has + p.p. 🏆\n• just(막), already(벌써), yet(아직) ⏳", rules: ["have", "has", "just", "already", "yet"], pitfalls: [{ title: "현재완료와 과거 시점 함께 사용 금지 ❌", bad: "I have seen him yesterday (X)", good: "I saw him yesterday (O) 🗓️" }], tip: "과거에 시작된 일이 현재까지 영향을 미칠 때 사용해요!", nativeExpressions: [{ emoji: "🤝", en: "I've heard a lot about you.", ko: "말씀 많이 들었습니다.", note: "처음 만난 사람에게 반갑게 인사할 때 써요." }, { emoji: "✈️", en: "Have you ever been to Korea?", ko: "한국에 와본 적 있으세요?", note: "Have you ever + p.p.? 경험을 묻는 질문이에요." }, { emoji: "🤷‍♂️", en: "I haven't decided yet.", ko: "나 아직 결정 못 했어.", note: "haven't + p.p. + yet 패턴 답변이에요." }, { emoji: "💡", en: "I've just changed my mind.", ko: "나 방금 마음 바꿨어.", note: "have just p.p. 막 완료된 일 표현이에요." }, { emoji: "📦", en: "Has it arrived yet?", ko: "그거 아직도 안 왔어?", note: "택배나 배달을 기다릴 때 달고 사는 문장이에요." }] },
+      { day: 6, units: "Unit 19 - 22", title: "현재완료 기간 (for/since) & 과거 비교", formula: "• for + 기간 (for 3 years ⏳)\n• since + 시작 시점 (since 2020 📅)", rules: ["for", "since", "ago"], pitfalls: [{ title: "for와 since 혼동 ❌", bad: "since 3 years (X)", good: "for 3 years (O) ⏳" }], tip: "기간은 for, 시작 시점은 since!", nativeExpressions: [{ emoji: "👋", en: "It's been a long time!", ko: "진짜 오랜만이다!", note: "Long time no see 보다 격식 없이 자주 쓰여요." }, { emoji: "💼", en: "I've been working here for 5 years.", ko: "나 여기서 일한 지 5년 됐어.", note: "for + 기간 구문으로 경력을 말할 때 필수!" }, { emoji: "☕", en: "How long has it been since we last met?", ko: "우리 마지막으로 본 지 얼마나 됐지?", note: "since절을 결합한 유용한 질문이에요." }, { emoji: "🎉", en: "I haven't seen you for ages!", ko: "너 진짜 오랜만이다!", note: "for ages는 '오랫동안'을 나타내는 관용구예요." }, { emoji: "🔄", en: "Things have changed a lot since then.", ko: "그때 이후로 많은 게 변했어.", note: "since then(그 이후로)과 현재완료 결합이에요." }] },
+      { day: 7, units: "Unit 23 - 24", title: "수동태 (Passive Voice)", formula: "• am/is/are/was/were + p.p. 🏗️", rules: ["is", "are", "was", "were", "by"], pitfalls: [{ title: "be동사 누락 수동태 오류 ❌", bad: "This building built in 1990 (X)", good: "This building was built in 1990 (O) 🏢" }], tip: "주어가 행동을 '당할 때' 사용하세요!", nativeExpressions: [{ emoji: "🚗", en: "I got stuck in traffic.", ko: "나 교통체증 때문에 갇혀있었어.", note: "was/got stuck 수동태로 지각 이유를 댈 때 1순위!" }, { emoji: "🍽️", en: "Is this place reserved?", ko: "여기 예약된 자리인가요?", note: "식당이나 카페에서 자리를 물어볼 때 자주 써요." }, { emoji: "👶", en: "I was born and raised in Seoul.", ko: "나 서울에서 태어나고 자랐어.", note: "자기소개 시 100% 쓰이는 수동태 표현이에요." }, { emoji: "🚫", en: "It is strictly prohibited.", ko: "그건 엄격히 금지되어 있습니다.", note: "규칙이나 안내판에 적힌 표준 표현이에요." }, { emoji: "✈️", en: "The flight was delayed due to bad weather.", ko: "날씨 때문에 비행편이 지연되었습니다.", note: "여행 시 자주 접하는 수동태 표현이에요." }] },
+      { day: 8, units: "Unit 25 - 26", title: "동사 시제 종합 응용 & 조동사", formula: "• 조동사 + 동사원형 🚀", rules: ["be", "have", "do"], pitfalls: [{ title: "조동사 뒤 to 오용 ❌", bad: "I will going to home (X)", good: "I will go home (O) 🏡" }], tip: "조동사 뒤에는 항상 동사원형!", nativeExpressions: [{ emoji: "☕", en: "What have you been up to?", ko: "그동안 어떻게 지냈어?", note: "근황을 물을 때 입에 달고 사는 인사예요." }, { emoji: "😅", en: "I couldn't help it.", ko: "어쩔 수 없었어.", note: "어쩔 수 없는 상황을 변명할 때 써요." }, { emoji: "🔍", en: "You'd better check it again.", ko: "너 그거 다시 확인해보는 게 좋을 걸.", note: "You had better + 동사원형 경고/충고예요." }, { emoji: "🏃‍♂️", en: "I'll be right back.", ko: "나 금방 돌아올게.", note: "잠시 자리를 비울 때 쓰는 필수 표현이에요." }, { emoji: "🎯", en: "Have you done this before?", ko: "너 이거 전에 해본 적 있어?", note: "경험을 묻는 매끄러운 질문이에요." }] },
+      { day: 9, units: "Unit 27 - 28", title: "미래 표현 (be going to / will)", formula: "• be going to (계획 📅) / will (즉흥 결심 ⚡)", rules: ["going to", "will"], pitfalls: [{ title: "미리 짜둔 계획에 will 오용 ❌", bad: "I will meet my doctor (어색함)", good: "I am going to meet my doctor (O) 🩺" }], tip: "즉흥 결정엔 will, 이미 잡힌 약속엔 be going to!", nativeExpressions: [{ emoji: "☕", en: "I'm gonna go grab a coffee.", ko: "나 커피 한 잔 사 올게.", note: "be going to를 구어체에서 gonna로 편하게 말해요." }, { emoji: "📲", en: "I'll let you know soon.", ko: "조만간 알려줄게.", note: "말하는 순간 약속할 때 I'll...을 써요." }, { emoji: "🤷‍♂️", en: "What are you gonna do about it?", ko: "너 그거 어떻게 할 건데?", note: "향후 대책을 물어보는 일상 표현이에요." }, { emoji: "🔥", en: "It's gonna be awesome!", ko: "진짜 대박일 거야!", note: "미래 상황을 기대할 때 쓰는 감탄이에요." }, { emoji: "⏱️", en: "I won't take long.", ko: "나 오래 안 걸려 / 금방 끝나.", note: "will not (won't)을 활용한 약속 구문이에요." }] },
+      { day: 10, units: "Unit 29 - 31", title: "가능성과 능력 (can/could/might)", formula: "• 능력: can 💪 / 추측: might ☁️", rules: ["can", "could", "might"], pitfalls: [{ title: "will + can 연속 사용 금지 ❌", bad: "I will can do it (X)", good: "I will be able to do it (O) 🎯" }], tip: "약한 추측에는 might를 써보세요!", nativeExpressions: [{ emoji: "⏳", en: "It might take a while.", ko: "시간이 좀 걸릴 수도 있어.", note: "불확실한 가능성을 유연하게 말할 때 might!" }, { emoji: "☕", en: "Can I get a coffee to go?", ko: "커피 테이크아웃으로 한 잔 줄 수 있어?", note: "주문할 때 Can I get...? 은 필수 문장이에요." }, { emoji: "🙏", en: "Could you do me a favor?", ko: "나 부탁 하나만 들어줄 수 있어?", note: "부탁할 때 Could you...? 로 물어보면 매너 짱!" }, { emoji: "👀", en: "You might want to check this out.", ko: "너 이것 좀 확인해보는 게 좋을 수도 있어.", note: "조심스럽게 추천할 때 쓰는 꿀표현이에요." }, { emoji: "💯", en: "I couldn't agree more.", ko: "전적으로 동감합니다.", note: "couldn't를 이용한 최고 수준의 찬성 표현이에요." }] },
+      { day: 11, units: "Unit 32 - 34", title: "의무와 충고 (must/should)", formula: "• 강한 의무: must 🚨 / 충고: should 🌿", rules: ["must", "should", "have to"], pitfalls: [{ title: "mustn't vs don't have to ❌", bad: "You mustn't pay, it's free (X)", good: "You don't have to pay (O) 🎁" }], tip: "친절한 조언에는 should가 제격!", nativeExpressions: [{ emoji: "🎯", en: "You should give it a try!", ko: "너 이거 한번 시도/도전해봐!", note: "강추할 때 should + give it a try를 씁니다." }, { en: "I gotta go now.", emoji: "🏃‍♂️", ko: "나 지금 가봐야 해.", note: "I gotta go! 입에 착 붙는 가야 한다는 표현이에요." }, { emoji: "☀️", en: "You don't have to rush.", ko: "서두를 필요 없어.", note: "don't have to는 안 해도 된다는 부담 해소 표현이에요." }, { emoji: "😴", en: "You must be exhausted.", ko: "너 진짜 피곤하겠다 / 지쳤겠어.", note: "must be... ~임에 틀림없다는 공감 추측이에요." }, { emoji: "💌", en: "We should keep in touch.", ko: "우리 계속 연락하고 지내자.", note: "헤어질 때 주고받는 대표 친근 인사예요." }] },
+      { day: 12, units: "Unit 35 - 38", title: "There is/are 구문 & 정중한 권유", formula: "• There is/are 🏡 / Would you like...? ☕", rules: ["there is", "there are"], pitfalls: [{ title: "There is + 복수명사 오류 ❌", bad: "There is many people (X)", good: "There are many people (O) 👥" }], tip: "존재를 새로 꺼낼 땐 There is/are!", nativeExpressions: [{ emoji: "🍵", en: "Would you like something to drink?", ko: "마실 것 좀 드릴까요?", note: "손님 접대 시 1순위 정중한 권유 표현이에요." }, { emoji: "🌈", en: "There's no need to worry.", ko: "걱정할 필요 전혀 없어.", note: "상대방을 안심시키는 따뜻한 문장이에요." }, { emoji: "🙋‍♀️", en: "Is there anything I can help with?", ko: "제가 도와드릴 일이라도 있나요?", note: "매너 있게 호의를 베풀 때 쓰는 문장이에요." }, { emoji: "🔧", en: "There's something wrong with this.", ko: "이거 뭔가 문제가 좀 있는데.", note: "기계나 상황에 오류가 있을 때 써요." }, { emoji: "🎉", en: "Would you like to join us?", ko: "너도 우리랑 같이 갈래/합류할래?", note: "모임에 초대할 때 쓰는 모범 문장이에요." }] },
+      { day: 13, units: "Unit 39 - 43", title: "간결한 동의 (So am I) & 부가의문문", formula: "• 긍정 동의: So do I 👍 / 부정 동의: Neither do I 🙅‍♂️", rules: ["so am i", "neither do i"], pitfalls: [{ title: "부정문에 Me too 오용 ❌", bad: "I don't like it. - Me too (X)", good: "Me neither (O) 🙅‍♀️" }], tip: "부정 동의는 Me neither!", nativeExpressions: [{ emoji: "🍕", en: "I'm starving. - So am I!", ko: "나 배고파 죽겠어. - 나도!", note: "상대방 긍정문(am)에 맞추어 So am I!" }, { emoji: "🤷‍♂️", en: "I don't get it. - Me neither.", ko: "나 이해가 안 가. - 나도 그래.", note: "부정문에 가볍게 동의할 땐 Me neither가 최고!" }, { emoji: "☀️", en: "Nice weather today, isn't it?", ko: "오늘 날씨 좋죠, 그렇죠?", note: "부가의문문 isn't it?으로 대화를 부드럽게 엽니다." }, { emoji: "🚗", en: "You're coming, right?", ko: "너 오는 거 맞지?", note: "끝에 right?을 붙여 가볍게 확인해요." }, { emoji: "☕", en: "I love coffee. - Same here!", ko: "나 커피 좋아해. - 나도 그래!", note: "So do I 대신 쉽게 쓸 수 있는 단골 반응이에요." }] },
+      { day: 14, units: "Unit 44 - 47", title: "의문문 어순 & 간접의문문", formula: "• Do you know + 의문사 + 주어 + 동사? 🗺️", rules: ["who", "what", "where"], pitfalls: [{ title: "간접의문문 도치 오류 ❌", bad: "Do you know where is he? (X)", good: "Do you know where he is? (O) 🔍" }], tip: "문장 중간 의문사는 '의문사+주어+동사'!", nativeExpressions: [{ emoji: "🚻", en: "Do you know where the restroom is?", ko: "화장실이 어디 있는지 아시나요?", note: "where + 주어 + 동사 간접의문문 대표 질문이에요." }, { emoji: "⏰", en: "How come you're so late?", ko: "너 어째서 이렇게 늦었어?", note: "Why 대신 편하게 자주 쓰는 의문 표현이에요." }, { emoji: "🎁", en: "What brings you here?", ko: "여기 어쩐 일로 오셨어요?", note: "뜻밖의 장소에서 반가운 사람을 만났을 때 씁니다." }, { emoji: "⌚", en: "Do you have any idea what time it is?", ko: "너 지금 몇 시인지나 알고 있어?", note: "늦게 들어온 사람에게 가볍게 핀잔줄 때 써요." }, { emoji: "📢", en: "Guess what!", ko: "너 그거 알아? / 대박 뉴스 있어!", note: "흥미로운 소식을 전하기 직전 던지는 추임새예요." }] },
+      { day: 15, units: "Unit 48 - 53", title: "간접화법 & 준동사 (to/ing)", formula: "• tell me / say that / enjoy + -ing 🎵 / want + to-v 🎯", rules: ["said", "told", "enjoy"], pitfalls: [{ title: "enjoy 뒤 to부정사 오용 ❌", bad: "I enjoy to play (X)", good: "I enjoy playing (O) 🎮" }], tip: "enjoy/finish 뒤에는 -ing!", nativeExpressions: [{ emoji: "📞", en: "He told me to give you a call.", ko: "그 사람이 너한테 전화해보라고 하더라.", note: "told me to-v 구문은 전언 전달 시 정말 많이 써요." }, { emoji: "🍕", en: "I feel like eating pizza tonight.", ko: "나 오늘 밤에 피자 땡긴다/먹고 싶다.", note: "feel like -ing (~하고 싶다) 필수 네이티브 표현!" }, { emoji: "🔑", en: "Don't forget to lock the door.", ko: "문 잠그는 거 잊지 마.", note: "forget + to-v (할 일을 잊지 마라) 당부 표현이에요." }, { emoji: "📚", en: "I spent all day studying English.", ko: "나 하루 종일 영어 공부하느라 시간 다 보냈어.", note: "spend 시간 -ing 패턴 문장이에요." }, { emoji: "🤫", en: "She promised to keep it a secret.", ko: "그녀는 비밀을 지키겠다고 약속했어.", note: "promise + to-v 조합 문장이에요." }] },
+      { day: 16, units: "Unit 54 - 60", title: "대명사, 소유격 & 재귀대명사", formula: "• my (소유격) vs mine (소유대명사) 🔑", rules: ["my", "mine", "myself"], pitfalls: [{ title: "소유격 단독 사용 오류 ❌", bad: "This is my (X)", good: "This is mine (O) 🎁" }], tip: "self는 주어와 목적어가 같을 때!", nativeExpressions: [{ emoji: "🏡", en: "Make yourself at home.", ko: "편하게 계세요 / 집처럼 편히 있어.", note: "손님을 초대했을 때 1순위 인사말이에요." }, { emoji: "🍰", en: "Help yourself!", ko: "마음껏 드세요 / 맘대로 가져가세요!", note: "음식이나 물건을 권할 때 짧게 던지는 표현이에요." }, { emoji: "🎒", en: "Is this yours or mine?", ko: "이거 네 거야, 내 거야?", note: "yours/mine 구별 실전 질문이에요." }, { emoji: "💪", en: "I did it all by myself.", ko: "나 이거 순전히 혼자서 다 해냈어.", note: "by myself (혼자서/남의 도움 없이) 관용구예요." }, { emoji: "💌", en: "Give my regards to your family.", ko: "가족분들께 안부 전해줘.", note: "작별 인사 시 안부를 전하는 모범 표현이에요." }] },
+      { day: 17, units: "Unit 61 - 68", title: "관사 (a/an/the) & 가산/불가산", formula: "• a/an (단수) / the (특정) / 불가산(advice 💡, water 💧)", rules: ["a", "an", "the"], pitfalls: [{ title: "불가산 명사에 a/an 붙이기 오류 ❌", bad: "an advice (X)", good: "some advice (O) 💡" }], tip: "advice, information에는 a/an 금지!", nativeExpressions: [{ emoji: "💡", en: "Thanks for the advice!", ko: "조언 고마워!", note: "advice는 불가산이므로 a를 붙이지 않고 the/some을 써요." }, { emoji: "☕", en: "I'll take the same, please.", ko: "저도 같은 걸로 할게요.", note: "식당이나 카페에서 앞 사람과 같은 걸 주문할 때!" }, { emoji: "🧂", en: "Could you pass me the salt?", ko: "식탁 위의 소금 좀 건네주실래요?", note: "눈앞의 특정 물건을 요청할 땐 the salt!" }, { emoji: "🌤️", en: "What's the weather like today?", ko: "오늘 날씨 어때?", note: "날씨를 물어볼 때 the weather로 고정해 써요." }, { emoji: "🏃‍♂️", en: "I'm in a hurry.", ko: "나 지금 좀 바빠 / 급해.", note: "in a hurry 관용 표현이에요." }] },
+      { day: 18, units: "Unit 69 - 76", title: "수량 표현 (some/any/many/much)", formula: "• 긍정문: some 🍎 / 부정·의문문: any ❓", rules: ["some", "any", "many"], pitfalls: [{ title: "부정문에 some 오용 ❌", bad: "I don't have some money (X)", good: "I don't have any money (O) 💵" }], tip: "부정문엔 any!", nativeExpressions: [{ emoji: "🤷‍♂️", en: "I don't have any idea.", ko: "나 전혀 감이 안 잡혀 / 전혀 몰라.", note: "부정문 any를 강조하여 빈번히 쓰는 문장이에요." }, { emoji: "🍽️", en: "Do you have any recommendations?", ko: "추천해 주실 만한 거 있으신가요?", note: "식당이나 장소 추천받을 때 꿀문장이에요." }, { emoji: "📋", en: "There are so many things to do.", ko: "할 일이 진짜 너무 많다.", note: "so many + 복수명사로 분주함을 표현해요." }, { emoji: "⏳", en: "I need a little more time.", ko: "나 시간이 조금만 더 필요해.", note: "a little + 불가산 명사(time) 구문이에요." }, { emoji: "🕊️", en: "Take as much time as you need.", ko: "필요한 만큼 천천히 시간 가져.", note: "상대방을 배려할 때 쓰는 스위트한 문장이에요." }] },
+      { day: 19, units: "Unit 77 - 84", title: "지시대명사 & 전체 표현 (all/both/every)", formula: "• both A and B 👫 / every + 단수명사 📅", rules: ["this", "that", "all"], pitfalls: [{ title: "every + 복수명사 오류 ❌", bad: "every days (X)", good: "every day (O) 🗓️" }], tip: "every 뒤엔 무조건 단수명사!", nativeExpressions: [{ emoji: "🎁", en: "Every single day is a gift.", ko: "매 하루하루가 선물이야.", note: "every 단수명사를 강조할 때 every single을 붙여요." }, { emoji: "🌟", en: "All you have to do is try your best.", ko: "너는 그저 최선을 다하기만 하면 돼.", note: "All you have to do is... 핵심 구문이에요." }, { emoji: "👗", en: "Both of them look good on you.", ko: "둘 다 너한테 잘 어울려.", note: "both of them 2개 다 해당할 때 쓰기 딱 좋아요." }, { emoji: "👏", en: "That's all for today.", ko: "오늘 준비한 건 여기까지입니다.", note: "수업이나 발표를 마무리할 때 대표 멘트예요." }, { emoji: "🌧️", en: "All of a sudden, it started to rain.", ko: "갑자기 비가 오기 시작했어.", note: "갑자기(Suddenly) 대신 자주 쓰는 수식어예요." }] },
+      { day: 20, units: "Unit 85 - 91", title: "형용사 & 부사 (Adjectives & Adverbs)", formula: "• fast 🏃‍♂️ -> fast, hard 🏋️‍♂️ -> hard, good -> well 👍", rules: ["ly", "well", "fast"], pitfalls: [{ title: "fastly 오용 ❌", bad: "drives fastly (X)", good: "drives fast (O) 🏎️" }], tip: "fast의 부사형은 그대로 fast!", nativeExpressions: [{ emoji: "⏰", en: "Time flies so fast!", ko: "시간 진짜 빠르다!", note: "fast 부사를 사용하여 시간의 빠름을 느낄 때 써요." }, { emoji: "👏", en: "You did a great job!", ko: "너 진짜 잘해냈어 / 짱이야!", note: "칭찬할 때 가장 기본적인 모범 문장이에요." }, { emoji: "😴", en: "I can't sleep well these days.", ko: "나 요즘 잠을 잘 못 자.", note: "동사 sleep을 수식해 줄 땐 부사 well을 써요!" }, { emoji: "🚘", en: "Drive safely and text me when you arrive.", ko: "안전운전하고 도착하면 문자해.", note: "부사 safely를 활용한 따뜻한 당부 인사예요." }, { emoji: "🔥", en: "Work hard, play hard!", ko: "일할 땐 열심히 일하고 놀 땐 신나게 놀자!", note: "hard 부사형을 사용한 대표 좌우명이에요." }] },
+      { day: 21, units: "Unit 92 - 97", title: "비교급 & 최상급 (Comparison)", formula: "• short-er than 📏 / the most famous 🌟", rules: ["er", "more", "than"], pitfalls: [{ title: "이중 비교급 오류 ❌", bad: "more cheaper (X)", good: "cheaper (O) 🏷️" }], tip: "비교급 강조엔 much!", nativeExpressions: [{ emoji: "🚀", en: "The sooner, the better.", ko: "빠르면 빠를수록 좋아.", note: "The 비교급, the 비교급 구조의 대표 문장이에요." }, { emoji: "✨", en: "It's much better than before.", ko: "이전보다 훨씬 훨씬 낫네.", note: "비교급 앞에 much를 붙여 훨씬 강조해 줘요." }, { emoji: "🎉", en: "This is the best day ever!", ko: "내 인생 최고의 날이야!", note: "최상급 뒤에 ever를 붙여 감격을 극대화해요." }, { emoji: "🏷️", en: "It's cheaper than I thought.", ko: "생각했던 것보다 더 저렴하네.", note: "than I thought (~했던 것보다) 조합은 완전 필수!" }, { emoji: "🐝", en: "He is as busy as a bee.", ko: "그 사람은 눈코 뜰 새 없이 바빠.", note: "as...as 구문을 이용한 재미있는 관용 표현이에요." }] },
+      { day: 22, units: "Unit 98 - 105", title: "접속사 & 조건문 (because/so/if)", formula: "• If + Present Simple, will + base verb ☂️", rules: ["because", "if", "when"], pitfalls: [{ title: "if절 속 will 오용 ❌", bad: "If it will rain... (X)", good: "If it rains... (O) 🌧️" }], tip: "If절은 현재시제가 미래를 대신합니다!", nativeExpressions: [{ emoji: "🤝", en: "If you need any help, just let me know.", ko: "도움 필요하면 언제든 말해.", note: "If절 속 현재시제(need)를 사용한 친절한 안내예요." }, { emoji: "📞", en: "Call me when you get home.", ko: "집 도착하면 나한테 전화해.", note: "when절 속 도착하다(get home) 현재시제 활용이에요." }, { emoji: "🚗", en: "I was late because the traffic was crazy.", ko: "차 막혀서 늦었어.", note: "because로 이유를 원활하게 설명해요." }, { emoji: "💡", en: "If I were you, I wouldn't do that.", ko: "내가 너라면 난 그거 안 할 텐데.", note: "상상 조언 가정법 If I were you 구문이에요." }, { emoji: "🌧️", en: "Let's wait here until the rain stops.", ko: "비 그칠 때까지 여기서 기다리자.", note: "until절 속 현재시제(stops) 문장이에요." }] },
+      { day: 23, units: "Unit 106 - 109", title: "관계대명사 (who / which / that)", formula: "• Noun + who 👤 / which 📦 / that ✨ + verb", rules: ["who", "which", "that"], pitfalls: [{ title: "대명사 중복 오용 ❌", bad: "The man who he lives... (X)", good: "The man who lives... (O) 🏡" }], tip: "who 뒤엔 대명사 중복 사용 금지!", nativeExpressions: [{ emoji: "🗣️", en: "Is there anyone who speaks English here?", ko: "여기 영어 할 줄 아는 분 계신가요?", note: "anyone who + 동사 조합의 실전 질문이에요." }, { emoji: "📍", en: "That's the place that I was talking about!", ko: "거기가 바로 내가 말했던 그 장소야!", note: "place that ~ 내가 말했던 장소 수식 구문이에요." }, { emoji: "🙋‍♂️", en: "I know a person who can help you.", ko: "너 도와줄 수 있는 사람 내가 알아.", note: "who 관계대명사 문장이에요." }, { emoji: "🎬", en: "This is the best movie that I've ever seen.", ko: "이거 내가 지금까지 본 영화 중 최고야.", note: "최상급 + 관계대명사 that + 완료형 결합 문장이에요." }, { emoji: "🛍️", en: "Do you have anything that fits my size?", ko: "제 사이즈에 맞는 물건이 혹시 있나요?", note: "쇼핑 시 유용하게 쓰이는 관계대명사 질문이에요." }] },
+      { day: 24, units: "Unit 110 - 116", title: "전치사 & 구동사 (Phrasal Verbs)", formula: "• at (시각 ⏰), on (요일/날짜 📅), in (월/연도 🗓️)", rules: ["at", "on", "in"], pitfalls: [{ title: "요일에 in 오용 ❌", bad: "in Monday (X)", good: "on Monday (O) 📅" }], tip: "특정 요일/날짜엔 on!", nativeExpressions: [{ emoji: "🔥", en: "Don't give up! Keep it up!", ko: "포기하지 마! 지금처럼 계속 잘해봐!", note: "Phrasal verbs(give up, keep up) 응원 멘트예요." }, { emoji: "🚘", en: "I'll pick you up at 7.", ko: "내가 7시에 너 태우러 갈게.", note: "pick someone up 차로 데리러 가다 필수 구동사예요." }, { emoji: "🔊", en: "Can you turn down the volume a bit?", ko: "볼륨 소리 좀 줄여줄 수 있어?", note: "turn down (소리를 줄이다) 구동사 요청 문장이에요." }, { emoji: "🥰", en: "I'm looking forward to meeting you.", ko: "너 만나기를 정말 기대하고 있어.", note: "look forward to -ing 대표 기대 표현이에요." }, { emoji: "☕", en: "We ran out of coffee.", ko: "우리 커피 다 떨어졌어.", note: "run out of (~이 다 떨어지다) 단골 구동사예요." }] }
+    ];
+
+    let currentMemberName = localStorage.getItem("gc_member_name") || "";
+    let groupMembers = [];
+    let activeDayIndex = 0;
+    let feedPosts = [];
+
+    // --- DOM Elements ---
+    const dayDropboxSelect = document.getElementById("dayDropboxSelect");
+    const activeDayBadge = document.getElementById("activeDayBadge");
+    const activeDayUnits = document.getElementById("activeDayUnits");
+    const activeDayTitle = document.getElementById("activeDayTitle");
+    const activeDayDesc = document.getElementById("activeDayDesc");
+    const grammarFormulaText = document.getElementById("grammarFormulaText");
+    const pitfallsContainer = document.getElementById("pitfallsContainer");
+    const proTipText = document.getElementById("proTipText");
+
+    const membersStatusContainer = document.getElementById("membersStatusContainer");
+    const submittedCountText = document.getElementById("submittedCountText");
+    const submissionRatioText = document.getElementById("submissionRatioText");
+    const groupProgressBar = document.getElementById("groupProgressBar");
+
+    const sentence1 = document.getElementById("sentence1");
+    const sentence2 = document.getElementById("sentence2");
+    const sentence3 = document.getElementById("sentence3");
+    const feedback1 = document.getElementById("feedback1");
+    const feedback2 = document.getElementById("feedback2");
+    const feedback3 = document.getElementById("feedback3");
+
+    const nativePatternsBox = document.getElementById("nativePatternsBox");
+    const nativePatternsList = document.getElementById("nativePatternsList");
+
+    const runPatternCheckBtn = document.getElementById("runPatternCheckBtn");
+    const submitFeedBtn = document.getElementById("submitFeedBtn");
+    const copyKakaoBtn = document.getElementById("copyKakaoBtn");
+    const feedContainer = document.getElementById("feedContainer");
+
+    const openLoginModalBtn = document.getElementById("openLoginModalBtn");
+    const currentMemberDisplay = document.getElementById("currentMemberDisplay");
+    const loginModal = document.getElementById("loginModal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const saveNicknameBtn = document.getElementById("saveNicknameBtn");
+    const nicknameInput = document.getElementById("nicknameInput");
+
+    function init() {
+      if (currentMemberName && !groupMembers.some(m => m.name === currentMemberName)) {
+        groupMembers.push({ name: currentMemberName, submittedDays: [] });
+      }
+      updateMemberUI();
+      renderDropboxOptions();
+      renderActiveDay();
+      renderFeed();
+      setupEventListeners();
+    }
+
+    function updateMemberUI() {
+      if (currentMemberName) {
+        currentMemberDisplay.textContent = currentMemberName;
+      } else {
+        currentMemberDisplay.textContent = "닉네임 등록/입장";
+      }
+      renderMemberStatus();
+    }
+
+    function renderDropboxOptions() {
+      dayDropboxSelect.innerHTML = "";
+      curriculumData.forEach((item, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = `Day ${item.day}: ${item.title} (${item.units})`;
+        dayDropboxSelect.appendChild(opt);
+      });
+      dayDropboxSelect.value = activeDayIndex;
+      document.getElementById("dayProgressText").textContent = `Day ${activeDayIndex + 1} / 24`;
+    }
+
+    function renderActiveDay() {
+      const day = curriculumData[activeDayIndex];
+      activeDayBadge.textContent = `DAY ${day.day} 🌟`;
+      activeDayUnits.textContent = day.units;
+      activeDayTitle.textContent = day.title;
+      activeDayDesc.textContent = `${day.units}의 핵심 포인트와 주의할 한국인 단골 실수를 학습합니다.`;
+
+      grammarFormulaText.innerText = day.formula;
+
+      // Pitfalls
+      pitfallsContainer.innerHTML = "";
+      day.pitfalls.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-base space-y-2";
+        card.innerHTML = `
+          <div class="font-extrabold text-amber-950 text-sm sm:text-base flex items-center justify-between">
+            <span>${p.title}</span>
+          </div>
+          <div class="text-red-600 font-bold line-through text-sm sm:text-base">❌ ${p.bad}</div>
+          <div class="text-emerald-700 font-extrabold text-sm sm:text-base">✅ ${p.good}</div>
+          ${p.note ? `<div class="text-slate-600 text-sm font-medium pt-1">${p.note}</div>` : ''}
+        `;
+        pitfallsContainer.appendChild(card);
+      });
+
+      proTipText.textContent = day.tip;
+
+      sentence1.value = ""; sentence2.value = ""; sentence3.value = "";
+      feedback1.classList.add("hidden"); feedback2.classList.add("hidden"); feedback3.classList.add("hidden");
+      nativePatternsBox.classList.add("hidden");
+
+      renderMemberStatus();
+    }
+
+    function renderMemberStatus() {
+      const activeDayNum = curriculumData[activeDayIndex].day;
+      membersStatusContainer.innerHTML = "";
+      let submittedCount = 0;
+
+      if (groupMembers.length === 0) {
+        membersStatusContainer.innerHTML = `<span class="text-sm text-slate-400 font-bold">🐣 우측 상단 [입장하기]로 첫 스터디원이 되어보세요!</span>`;
+        submittedCountText.textContent = `0/0 완료`;
+        submissionRatioText.textContent = `0/0`;
+        groupProgressBar.style.width = `0%`;
+        return;
+      }
+
+      groupMembers.forEach(m => {
+        const hasSubmitted = m.submittedDays && m.submittedDays.includes(activeDayNum);
+        if (hasSubmitted) submittedCount++;
+
+        const badge = document.createElement("div");
+        badge.className = `inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-sm font-extrabold ${
+          hasSubmitted ? "bg-emerald-100 text-emerald-800 border border-emerald-200" : "bg-slate-200/70 text-slate-500"
+        }`;
+        badge.innerHTML = `<span>${m.name}</span><span>${hasSubmitted ? '✅' : '⏳'}</span>`;
+        membersStatusContainer.appendChild(badge);
+      });
+
+      submittedCountText.textContent = `${submittedCount}/${groupMembers.length} 완료`;
+      submissionRatioText.textContent = `${submittedCount}/${groupMembers.length}`;
+      const pct = Math.round((submittedCount / groupMembers.length) * 100);
+      groupProgressBar.style.width = `${pct}%`;
+    }
+
+    function handleSentenceInput(inputEl, feedbackEl) {
+      const text = inputEl.value.trim();
+      if (!text) { feedbackEl.classList.add("hidden"); return; }
+
+      const rules = curriculumData[activeDayIndex].rules;
+      const matched = rules.filter(r => text.toLowerCase().includes(r.toLowerCase()));
+
+      feedbackEl.classList.remove("hidden");
+      if (matched.length > 0) {
+        feedbackEl.innerHTML = `<span class="text-emerald-700 font-extrabold text-sm sm:text-base">🎉 핵심 키워드 감지 성공! (${matched.join(", ")})</span>`;
+      } else {
+        feedbackEl.innerHTML = `<span class="text-amber-700 font-bold text-sm sm:text-base">💡 오늘의 권장 패턴 (${rules.slice(0, 3).join(", ")}) 활용을 추천해요.</span>`;
+      }
+    }
+
+    // --- Run Grammar Pattern Check Handler ---
+    function handleRunPatternCheck() {
+      const day = curriculumData[activeDayIndex];
+      nativePatternsList.innerHTML = "";
+
+      day.nativeExpressions.forEach((item, idx) => {
+        const card = document.createElement("div");
+        card.className = "p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-1.5";
+        card.innerHTML = `
+          <div class="flex items-start space-x-3.5">
+            <span class="text-2xl flex-shrink-0 mt-0.5">${item.emoji}</span>
+            <div class="space-y-1">
+              <div class="text-base font-extrabold text-slate-900 font-mono">"${item.en}"</div>
+              <div class="text-sm sm:text-base font-bold text-indigo-700">${item.ko}</div>
+              <div class="text-sm text-slate-500 font-medium">💡 ${item.note}</div>
+            </div>
+          </div>
+        `;
+        nativePatternsList.appendChild(card);
+      });
+
+      nativePatternsBox.classList.remove("hidden");
+      nativePatternsBox.scrollIntoView({ behavior: 'smooth' });
+      showToast(`DAY ${day.day} 원어민 실생활 표현 5가지가 펼쳐졌어요! ✨`);
+    }
+
+    function handleSubmitFeed() {
+      if (!currentMemberName) {
+        alert("먼저 우측 상단에서 닉네임을 등록하고 입장해 주세요! 🐣");
+        openLoginModalBtn.click();
+        return;
+      }
+
+      const s1 = sentence1.value.trim();
+      const s2 = sentence2.value.trim();
+      const s3 = sentence3.value.trim();
+
+      if (!s1 || !s2) { alert("문장 1과 2를 모두 작성해 주세요!"); return; }
+
+      const activeDayNum = curriculumData[activeDayIndex].day;
+      let memberObj = groupMembers.find(m => m.name === currentMemberName);
+      if (memberObj && !memberObj.submittedDays.includes(activeDayNum)) {
+        memberObj.submittedDays.push(activeDayNum);
+      }
+
+      const sentencesArr = [`1. ${s1}`, `2. ${s2}`];
+      if (s3) sentencesArr.push(`3. ${s3}`);
+
+      feedPosts.unshift({
+        id: Date.now(),
+        author: currentMemberName,
+        day: activeDayNum,
+        time: "방금 전",
+        sentences: sentencesArr,
+        hearts: 0,
+        thumbs: 0
+      });
+
+      renderMemberStatus();
+      renderFeed();
+      showToast("그룹 피드에 성공적으로 인증되었습니다! 🚀");
+    }
+
+    function handleCopyKakao() {
+      if (!currentMemberName) {
+        alert("먼저 우측 상단에서 닉네임을 등록해 주세요! 🐣");
+        openLoginModalBtn.click();
+        return;
+      }
+
+      const s1 = sentence1.value.trim();
+      const s2 = sentence2.value.trim();
+      const s3 = sentence3.value.trim();
+
+      if (!s1 || !s2) { alert("문장 1과 2를 모두 작성해 주세요!"); return; }
+
+      const day = curriculumData[activeDayIndex];
+      let text = `[Grammar Circle 인증 ✍️]\n이름: ${currentMemberName}\n진도: DAY ${day.day} (${day.units})\n--------------------\n1. ${s1}\n2. ${s2}\n`;
+      if (s3) text += `3. ${s3}\n`;
+      text += `--------------------\n#GrammarCircle #영어스터디`;
+
+      navigator.clipboard.writeText(text).then(() => showToast("카톡 제출용 메시지가 복사되었어요! 📋"));
+    }
+
+    window.reactFeed = function(postId, type) {
+      const post = feedPosts.find(p => p.id === postId);
+      if (post) {
+        if (type === 'heart') post.hearts++;
+        if (type === 'thumb') post.thumbs++;
+        renderFeed();
+        showToast("응원 리액션을 보냈습니다! ❤️👍");
+      }
+    };
+
+    function renderFeed() {
+      feedContainer.innerHTML = "";
+      if (feedPosts.length === 0) {
+        feedContainer.innerHTML = `<div class="text-center py-8 text-sm sm:text-base text-slate-400 font-bold">아직 등록된 스터디 인증글이 없어요. 첫 번째 인증글을 남겨보세요! 🚀</div>`;
+        return;
+      }
+
+      feedPosts.forEach(post => {
+        const card = document.createElement("div");
+        card.className = "p-5 rounded-2xl border border-slate-200/80 bg-slate-50/50 space-y-3.5";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-10 h-10 rounded-full bg-indigo-600 text-white font-extrabold text-sm flex items-center justify-center">${post.author[0]}</div>
+              <span class="text-sm sm:text-base font-extrabold text-slate-800">${post.author}</span>
+              <span class="text-sm text-slate-400 font-medium">${post.time}</span>
+            </div>
+            <span class="text-sm font-black text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">DAY ${post.day}</span>
+          </div>
+          <div class="space-y-2.5">
+            ${post.sentences.map(s => `<p class="text-sm sm:text-base text-slate-800 bg-white p-3.5 rounded-xl border border-slate-100 font-bold">${s}</p>`).join("")}
+          </div>
+          <div class="flex items-center space-x-3.5 pt-1 text-sm">
+            <button onclick="reactFeed(${post.id}, 'heart')" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-white border border-slate-200 hover:border-pink-300 hover:bg-pink-50 text-slate-700 transition-all font-bold">
+              <span>❤️</span>
+              <span>${post.hearts}</span>
+            </button>
+            <button onclick="reactFeed(${post.id}, 'thumb')" class="flex items-center space-x-2 px-4 py-2 rounded-full bg-white border border-slate-200 hover:border-amber-300 hover:bg-amber-50 text-slate-700 transition-all font-bold">
+              <span>👍</span>
+              <span>${post.thumbs}</span>
+            </button>
+          </div>
+        `;
+        feedContainer.appendChild(card);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toastMsg").textContent = msg;
+      toast.classList.remove("opacity-0", "pointer-events-none");
+      setTimeout(() => toast.classList.add("opacity-0", "pointer-events-none"), 2500);
+    }
+
+    function setupEventListeners() {
+      dayDropboxSelect.addEventListener("change", (e) => {
+        activeDayIndex = parseInt(e.target.value);
+        document.getElementById("dayProgressText").textContent = `Day ${activeDayIndex + 1} / 24`;
+        renderActiveDay();
+      });
+
+      document.getElementById("menuDailyPractice").addEventListener("click", () => {
+        document.getElementById("practiceSection").scrollIntoView({ behavior: 'smooth' });
+      });
+      document.getElementById("menuGroupFeed").addEventListener("click", () => {
+        document.getElementById("feedSection").scrollIntoView({ behavior: 'smooth' });
+      });
+      document.getElementById("menuUnitRoadmap").addEventListener("click", () => {
+        alert("24일 전체 학습 로드맵 및 모든 Unit이 드롭다운 메뉴에 등록되어 있습니다! 🗺️");
+      });
+
+      sentence1.addEventListener("input", () => handleSentenceInput(sentence1, feedback1));
+      sentence2.addEventListener("input", () => handleSentenceInput(sentence2, feedback2));
+      sentence3.addEventListener("input", () => handleSentenceInput(sentence3, feedback3));
+
+      runPatternCheckBtn.addEventListener("click", handleRunPatternCheck);
+      submitFeedBtn.addEventListener("click", handleSubmitFeed);
+      copyKakaoBtn.addEventListener("click", handleCopyKakao);
+
+      openLoginModalBtn.addEventListener("click", () => {
+        nicknameInput.value = currentMemberName;
+        loginModal.classList.remove("hidden");
+      });
+      closeModalBtn.addEventListener("click", () => loginModal.classList.add("hidden"));
+      saveNicknameBtn.addEventListener("click", () => {
+        const val = nicknameInput.value.trim();
+        if (val) {
+          currentMemberName = val;
+          localStorage.setItem("gc_member_name", val);
+          if (!groupMembers.some(m => m.name === val)) groupMembers.push({ name: val, submittedDays: [] });
+          updateMemberUI();
+          loginModal.classList.add("hidden");
+          showToast(`'${val}' 멤버로 입장하셨습니다! 🐣`);
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
